@@ -1,5 +1,6 @@
 package com.pw5.mynote;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,9 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,7 +42,7 @@ class NoteControllerTest {
 
     @Test
     void testGetAllNotesNull() {
-        when(noteService.getAllNotes()).thenReturn(null);
+        when(noteService.getAllNotes()).thenReturn(Collections.emptyList());
 
         ResponseEntity<?> response = noteController.allNotes();
 
@@ -118,6 +121,8 @@ class NoteControllerTest {
 
     @Test
     void testDeleteNoteNull() {
+        doThrow(EntityNotFoundException.class).when(noteService).deleteById(1L);
+
         ResponseEntity<?> response = noteController.deleteNote(1L);
 
         assertEquals(404, response.getStatusCode().value());

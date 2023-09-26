@@ -1,5 +1,6 @@
 package com.pw5.mynote;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,7 +21,7 @@ public class NoteController {
     @GetMapping("/notes")
     public ResponseEntity<?> allNotes() {
         List<Note> notes = noteService.getAllNotes();
-        if (notes == null)
+        if (notes.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok().body(notes);
     }
@@ -28,6 +29,7 @@ public class NoteController {
     @GetMapping("/note")
     public ResponseEntity<?> getNote(@RequestParam long id) {
         Note note = noteService.getById(id);
+        System.out.println(note);
         if (note == null)
             return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(new NoteDTO(note.getTitle(), note.getContent()));
@@ -52,11 +54,12 @@ public class NoteController {
 
     @DeleteMapping("/delete-note")
     public ResponseEntity<Void> deleteNote(@RequestParam long id) {
-        if (noteService.getById(id) == null)
+        try {
+            noteService.deleteById(id);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
-
-        noteService.deleteById(id);
-        return ResponseEntity.ok().build();
+        }
     }
 }
 
